@@ -1,4 +1,5 @@
 "use strict";
+// implementation based on : https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
 var handlers = {};
@@ -14,6 +15,8 @@ var normalizePoint = function (canvas, point) {
     point.y = Math.max(0, point.y);
     point.x = Math.min(canvas.width, point.x);
     point.y = Math.min(canvas.height, point.y);
+    point.x = Math.floor(point.x);
+    point.y = Math.floor(point.y);
     return point;
 };
 var drawPixel = function (ctx, point, color) {

@@ -24,6 +24,10 @@ const normalizePoint = (canvas: HTMLCanvasElement, point: xy) => {
 
     point.x = Math.min(canvas.width, point.x)
     point.y = Math.min(canvas.height, point.y)
+    
+    point.x = Math.floor(point.x)
+    point.y = Math.floor(point.y)
+
     return point
 } 
 
