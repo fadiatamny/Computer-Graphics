@@ -2,6 +2,10 @@
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
 var handlers = {};
+var berzierCurves = [];
+var firstPoint;
+var drawing = false;
+var done = true;
 var getPointer = function (canvas, event) {
     var rect = canvas.getBoundingClientRect();
     return {
@@ -22,6 +26,12 @@ var distance = function (a, b) {
     var dx = a.x - b.x;
     var dy = a.y - b.y;
     return Math.sqrt((dx * dx) + (dy * dy));
+};
+var matrixMultipication = function (a, b) {
+    var transpose = function (a) { return a[0].map(function (x, i) { return a.map(function (y) { return y[i]; }); }); };
+    var dotproduct = function (a, b) { return a.map(function (x, i) { return a[i] * b[i]; }).reduce(function (m, n) { return m + n; }); };
+    var result = function (a, b) { return a.map(function (x) { return transpose(b).map(function (y) { return dotproduct(x, y); }); }); };
+    return result(a, b);
 };
 var drawPixel = function (ctx, point, options) {
     var _a;
@@ -59,32 +69,31 @@ var drawLine = function (ctx, a, b) {
         }
     }
 };
-var bezierPoint = function (points, t) {
-    var aX = -points[0].x + (3 * points[1].x) + (-3 * points[2].x) + points[3].x;
-    var aY = -points[0].y + (3 * points[1].y) + (-3 * points[2].y) + points[3].y;
-    var bX = (3 * points[0].x) + (-6 * points[1].x) + (3 * points[2].x);
-    var bY = (3 * points[0].y) + (-6 * points[1].y) + (3 * points[2].y);
-    var cX = (-3 * points[0].x) + (3 * points[1].x);
-    var cY = (-3 * points[0].y) + (3 * points[1].y);
-    var x = Math.round((aX * Math.pow(t, 3)) + (bX * Math.pow(t, 2)) + (cX * t) + points[0].x);
-    var y = Math.round((aY * Math.pow(t, 3)) + (bY * Math.pow(t, 2)) + (cY * t) + points[0].y);
+var bezierPoint = function (xMatrix, yMatrix, t) {
+    var tMatrix = [[Math.pow(t, 3), Math.pow(t, 2), t, 1]];
+    var x = Math.round(matrixMultipication(tMatrix, xMatrix)[0][0]);
+    var y = Math.round(matrixMultipication(tMatrix, yMatrix)[0][0]);
     return { x: x, y: y };
 };
 var bezierCurve = function (ctx, points, accuracy) {
+    var bezierMatrix = [
+        [-1, 3, -3, 1],
+        [3, -6, 3, 0],
+        [-3, 3, 0, 0],
+        [1, 0, 0, 0],
+    ];
+    var xMatrix = [];
+    var yMatrix = [];
+    points.map(function (p) { xMatrix.push([p.x]); yMatrix.push([p.y]); });
+    xMatrix = matrixMultipication(bezierMatrix, xMatrix);
+    yMatrix = matrixMultipication(bezierMatrix, yMatrix);
     var startPoint = points[0];
     for (var i = 0; i <= accuracy; i++) {
-        var bPoint = bezierPoint(points, i / accuracy);
-        debugger;
+        var bPoint = bezierPoint(xMatrix, yMatrix, i / accuracy);
         drawLine(ctx, startPoint, bPoint);
-        console.log(startPoint);
         startPoint = bPoint;
-        console.log(startPoint);
     }
 };
-var berzierCurves = [];
-var firstPoint;
-var drawing = false;
-var done = true;
 var mouseDown = function (e) {
 };
 var mouseMove = function (e) {

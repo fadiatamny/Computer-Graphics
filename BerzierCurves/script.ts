@@ -6,6 +6,11 @@ interface xy {
 const canvas = document.getElementById('canvas') as HTMLCanvasElement
 const ctx = canvas.getContext('2d')
 const handlers: { [key: string]: (e: MouseEvent) => void } = {}
+const berzierCurves: Array<{ points: xy[], accuracy: number}> = []
+
+let firstPoint: xy
+let drawing = false
+let done = true
 
 const getPointer = (canvas: HTMLCanvasElement, event: MouseEvent): xy => {
     const rect = canvas.getBoundingClientRect()
@@ -33,6 +38,13 @@ const distance = (a :xy , b: xy) => {
     const dy = a.y - b.y
 
     return Math.sqrt((dx * dx) + (dy * dy))
+}
+
+const matrixMultipication = (a: number[][], b: number[][]) => {
+    const transpose = (a: number[][]) => a[0].map((x, i) => a.map((y) => y[i]))
+    const dotproduct = (a: number[], b: number[]) => a.map((x, i) => a[i] * b[i]).reduce((m, n) => m + n)
+    const result = (a: number[][], b: number[][]) => a.map((x) => transpose(b).map((y) => dotproduct(x, y)))
+    return result(a, b)
 }
 
 const drawPixel = (ctx: CanvasRenderingContext2D, point: xy, options: { color?: string, joint?: boolean } = {}) => {
@@ -77,40 +89,37 @@ const drawLine = (ctx: CanvasRenderingContext2D, a: xy, b: xy) => {
     }
 }
 
-const bezierPoint = (points: xy[], t: number) => {
-    const aX = -points[0].x + (3 * points[1].x) + (-3 * points[2].x) + points[3].x
-    const aY = -points[0].y + (3 * points[1].y) + (-3 * points[2].y) + points[3].y
-    
-    const bX = (3 * points[0].x) + (-6 * points[1].x) + (3 * points[2].x)
-    const bY = (3 * points[0].y) + (-6 * points[1].y) + (3 * points[2].y)
+const bezierPoint = (xMatrix: number[][], yMatrix: number[][], t: number) => {
+    const tMatrix: number[][] = [[Math.pow(t, 3), Math.pow(t, 2), t, 1]]
 
-    const cX = (-3 * points[0].x) + (3 * points[1].x)
-    const cY = (-3 * points[0].y) + (3 * points[1].y)
-
-    const x = Math.round((aX * Math.pow(t, 3)) + (bX * Math.pow(t, 2)) + (cX * t) + points[0].x)
-    const y = Math.round((aY * Math.pow(t, 3)) + (bY * Math.pow(t, 2)) + (cY * t) + points[0].y)
+    const x = Math.round(matrixMultipication(tMatrix, xMatrix)[0][0])
+    const y = Math.round(matrixMultipication(tMatrix, yMatrix)[0][0])
     
-    return {x, y};
+    return {x, y}
 }
 
 const bezierCurve = (ctx: CanvasRenderingContext2D, points: xy[], accuracy: number) => {
+    const bezierMatrix = [
+        [-1, 3, -3, 1],
+        [3, -6, 3, 0],
+        [-3, 3, 0, 0],
+        [1, 0, 0, 0],
+    ]
+    let xMatrix: number[][] = []
+    let yMatrix: number[][] = []
+
+    points.map((p) => {xMatrix.push([p.x]); yMatrix.push([p.y])})
+    xMatrix = matrixMultipication(bezierMatrix, xMatrix)
+    yMatrix = matrixMultipication(bezierMatrix, yMatrix)
+
     let startPoint = points[0]
 
     for (let i = 0; i <= accuracy ; i++) {
-        const bPoint = bezierPoint(points, i / accuracy)
-        debugger
+        const bPoint = bezierPoint(xMatrix, yMatrix, i / accuracy)
         drawLine(ctx, startPoint, bPoint)
-        console.log(startPoint)
         startPoint = bPoint
-        console.log(startPoint)
     }
 }
-
-const berzierCurves: Array<{ points: xy[], accuracy: number}> = []
-
-let firstPoint: xy
-let drawing = false
-let done = true
 
 const mouseDown = (e: MouseEvent) => {
 }
