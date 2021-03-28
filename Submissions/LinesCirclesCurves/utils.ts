@@ -14,17 +14,17 @@ export const drawPixel = (ctx: CanvasRenderingContext2D, point: xy, options: { c
 
 
 export const drawCircle = (ctx: CanvasRenderingContext2D, center: xy, point: xy, color: string = '#000000') => {
-    drawPixel(ctx, normalizePoint(ctx.canvas, { x: center.x + point.x, y: center.y+point.y }), {color});
-    drawPixel(ctx, normalizePoint(ctx.canvas, { x: center.x-point.x, y: center.y+point.y }), {color});
-    drawPixel(ctx, normalizePoint(ctx.canvas, { x: center.x+point.x, y: center.y-point.y }), {color});
-    drawPixel(ctx, normalizePoint(ctx.canvas, { x: center.x-point.x, y: center.y-point.y }), {color});
-    drawPixel(ctx, normalizePoint(ctx.canvas, { x: center.x+point.y, y: center.y + point.x }), {color});
-    drawPixel(ctx, normalizePoint(ctx.canvas, { x: center.x-point.y, y: center.y + point.x }), {color});
-    drawPixel(ctx, normalizePoint(ctx.canvas, { x: center.x+point.y, y: center.y - point.x }), {color});
-    drawPixel(ctx, normalizePoint(ctx.canvas, { x: center.x-point.y, y: center.y - point.x }), {color});
+    drawPixel(ctx, normalizePoint(ctx.canvas, { x: center.x + point.x, y: center.y + point.y }), { color });
+    drawPixel(ctx, normalizePoint(ctx.canvas, { x: center.x - point.x, y: center.y + point.y }), { color });
+    drawPixel(ctx, normalizePoint(ctx.canvas, { x: center.x + point.x, y: center.y - point.y }), { color });
+    drawPixel(ctx, normalizePoint(ctx.canvas, { x: center.x - point.x, y: center.y - point.y }), { color });
+    drawPixel(ctx, normalizePoint(ctx.canvas, { x: center.x + point.y, y: center.y + point.x }), { color });
+    drawPixel(ctx, normalizePoint(ctx.canvas, { x: center.x - point.y, y: center.y + point.x }), { color });
+    drawPixel(ctx, normalizePoint(ctx.canvas, { x: center.x + point.y, y: center.y - point.x }), { color });
+    drawPixel(ctx, normalizePoint(ctx.canvas, { x: center.x - point.y, y: center.y - point.x }), { color });
 }
 
-export const euclideanDistance = (a :xy , b: xy) => {
+export const euclideanDistance = (a: xy, b: xy) => {
     const dx = a.x - b.x
     const dy = a.y - b.y
 

@@ -3,10 +3,11 @@ import { xy } from './models'
 import { drawPixel, normalizePoint, getPointer } from './utils'
 
 export default class Line {
-    private _lines: Array<{ first: xy, last: xy }>
+    private _lines: Array<{ first: xy, last: xy, color: string }>
     private _firstPoint: xy | undefined
     private _drawing: boolean = false
     private _ctx: CanvasRenderingContext2D | null
+    private _color: string = '#000000'
     private _handlers: { [key: string]: (e: MouseEvent) => void } = {}
 
     constructor(
@@ -24,15 +25,11 @@ export default class Line {
         this._handlers['mousemove'] = this.mouseMove.bind(this)
         this._handlers['mouseup'] = this.mouseUp.bind(this)
     }
-    
+
     /**
      * implementation based on : https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
-     * @param ctx 
-     * @param a 
-     * @param b 
-     * @returns 
      */
-    private drawLine (ctx: CanvasRenderingContext2D, a: xy, b: xy) {
+    private drawLine(ctx: CanvasRenderingContext2D, a: xy, b: xy, color: string) {
         const dx = Math.abs(b.x - a.x)
         const dy = -Math.abs(b.y - a.y)
         const sx = a.x < b.x ? 1 : -1
@@ -42,7 +39,7 @@ export default class Line {
         const p = { x: a.x, y: a.y }
 
         while (true) {
-            drawPixel(ctx, p)
+            drawPixel(ctx, p, { color })
 
             if (Math.abs(p.x - b.x) < 0.0001 && Math.abs(p.y - b.y) < 0.0001) {
                 return
@@ -62,8 +59,8 @@ export default class Line {
         }
     }
 
-    private drawLines (ctx: CanvasRenderingContext2D, lines: Array<{ first: xy, last: xy }>) {
-        lines.forEach((l) => this.drawLine(ctx, l.first, l.last))
+    private drawLines(ctx: CanvasRenderingContext2D, lines: Array<{ first: xy, last: xy, color: string }>) {
+        lines.forEach((l) => this.drawLine(ctx, l.first, l.last, l.color))
     }
 
     private mouseDown(e: MouseEvent) {
@@ -79,7 +76,7 @@ export default class Line {
 
         this._ctx!.clearRect(0, 0, this._ctx!.canvas.width, this._ctx!.canvas.height)
 
-        this.drawLine(this._ctx!, this._firstPoint!, point)
+        this.drawLine(this._ctx!, this._firstPoint!, point, this._color)
         this.drawLines(this._ctx!, this._lines)
     }
 
@@ -90,31 +87,35 @@ export default class Line {
 
         this._ctx!.clearRect(0, 0, this._ctx!.canvas.width, this._ctx!.canvas.height)
 
-        this._lines.push({ first: this._firstPoint!, last: point })
+        this._lines.push({ first: this._firstPoint!, last: point, color: this._color })
         this.drawLines(this._ctx!, this._lines)
 
         this._drawing = false
     }
 
-    public draw () {
+    public draw() {
         this._ctx!.clearRect(0, 0, this._ctx!.canvas.width, this._ctx!.canvas.height)
         this.drawLines(this._ctx!, this._lines)
     }
 
-    public init () {
+    public init() {
         // @ts-ignore
         Object.entries(this._handlers).forEach(([key, value]) => this._container.addEventListener(key, value))
         this._drawing = false
     }
 
-    public dispose () {
+    public dispose() {
         // @ts-ignore
         Object.entries(this._handlers).forEach(([key, value]) => this._container.removeEventListener(key, value))
 
-        if(this._drawing) {
+        if (this._drawing) {
             this._drawing = false
             this.draw()
         }
+    }
+
+    public switchColor(color: string) {
+        this._color = color
     }
 
     public clearCanvas() {

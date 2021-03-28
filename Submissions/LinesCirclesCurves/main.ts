@@ -13,6 +13,10 @@ const circleButton = document.getElementById('circleButton') as HTMLButtonElemen
 const curveButton = document.getElementById('curveButton') as HTMLButtonElement
 const clearCanvasesButton = document.getElementById('clearCanvasesButton') as HTMLButtonElement
 
+const colorPicker = document.getElementById('lineColor') as HTMLInputElement
+const controlLineCountDiv = document.getElementById('controlLineCountDiv') as HTMLDivElement
+const controlLineCountInput = document.getElementById('controlLineCountInput') as HTMLInputElement
+
 const lineMachine = new Line(container, lineCanvas)
 const circleMachine = new Circle(container, circleCanvas)
 const curveMachine = new Curve(container, curveCanvas)
@@ -34,31 +38,49 @@ let mode: WorkMode = {
     machine: null
 }
 
+const _initLineMode = () => {
+    mode.state = WorkState.LINE
+    mode.machine = lineMachine
+    mode.machine.init()
+}
 
+const _initCircleMode = () => {
+    mode.state = WorkState.CIRCLE
+    mode.machine = circleMachine
+    mode.machine.init()
+}
+
+const _initCurveMode = () => {
+    mode.state = WorkState.CURVE
+    mode.machine = curveMachine
+    mode.machine.init()
+    controlLineCountDiv.style.display = 'block'
+}
+
+const _initIdleMode = () => {
+    mode.state = WorkState.IDLE
+    mode.machine = null
+}
 
 const _switchMode = (state: WorkState) => {
     if (mode.machine && mode.state !== WorkState.IDLE) {
         mode.machine.dispose()
+        if (mode.state === WorkState.CURVE) {
+            controlLineCountDiv.style.display = 'none'
+        }
     }
     switch (state) {
         case WorkState.LINE:
-            mode.state = WorkState.LINE
-            mode.machine = lineMachine
-            mode.machine.init()
+            _initLineMode()
             break
         case WorkState.CIRCLE:
-            mode.state = WorkState.CIRCLE
-            mode.machine = circleMachine
-            mode.machine.init()
+            _initCircleMode()
             break
         case WorkState.CURVE:
-            mode.state = WorkState.CURVE
-            mode.machine = curveMachine
-            mode.machine.init()
+            _initCurveMode()
             break
         default:
-            mode.state = WorkState.IDLE
-            mode.machine = null
+            _initIdleMode()
     }
 }
 
@@ -75,6 +97,27 @@ const _clearAllCanvases = () => {
     curveMachine.clearCanvas()
 }
 
+colorPicker.addEventListener('change', (e) => {
+    // @ts-ignore
+    lineMachine.switchColor(e.target.value)
+    // @ts-ignore
+    circleMachine.switchColor(e.target.value)
+    // @ts-ignore
+    curveMachine.switchColor(e.target.value)
+});
+
+controlLineCountDiv.style.display = 'none'
+
+controlLineCountInput.addEventListener('change', (e) => {
+    // @ts-ignore
+    e.target.value = Math.max(1, e.target.value)
+    // @ts-ignore
+    e.target.value = Math.min(10000, e.target.value)
+    // @ts-ignore
+    controlLineCountInput.value = e.target.value
+    // @ts-ignore
+    curveMachine.switchAccuracy(e.target.value)
+})
 
 _initButtons()
 _switchMode(WorkState.IDLE)

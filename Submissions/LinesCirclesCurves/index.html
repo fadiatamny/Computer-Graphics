@@ -25,6 +25,17 @@
     </main>
     <section class="right-sidebar">
         <button id="clearCanvasesButton" class="btn">Clear All Canvases</button>
+        <div>
+            <hr class="btn dashed">
+            <label class="btn" for="head">Choose Line Color:</label>
+            <input class="btn" type="color" id="lineColor" name="LineColor" value="#000000">
+        </div>
+        <div id="controlLineCountDiv">
+            <hr class="btn dashed">
+            <label class="btn" for="head">Choose Amount of Control Lines: <br>(1 - 1000)</label>
+            <input class="btn" type="number" id="controlLineCountInput" name="controlLineCountInput" min="1" max="10000"
+                value="100">
+        </div>
     </section>
 
     <script src="./bin/bundle.js"></script>
