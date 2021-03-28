@@ -121,13 +121,6 @@ const bezierCurve = (ctx: CanvasRenderingContext2D, points: xy[], accuracy: numb
     }
 }
 
-const mouseDown = (e: MouseEvent) => {
-}
-
-const mouseMove = (e: MouseEvent) => {
-
-}
-
 const mouseUp = (e: MouseEvent) => {
     if (done) {
         ctx!.clearRect(0, 0, ctx!.canvas.width, ctx!.canvas.height)
@@ -157,8 +150,6 @@ const mouseUp = (e: MouseEvent) => {
     }
 }
 
-handlers['mousedown'] = mouseDown
-handlers['mousemove'] = mouseMove
 handlers['mouseup'] = mouseUp
 
 // @ts-ignore
